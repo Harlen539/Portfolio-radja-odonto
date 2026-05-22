@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap');
+
+:root {
+  --color-ice: #f6fbfd;
+  --color-white: #ffffff;
+  --color-mist: #e9f5f8;
+  --color-blue-50: #d9eef4;
+  --color-blue-100: #b9dce7;
+  --color-blue-300: #7cb7ca;
+  --color-petrol: #075f7c;
+  --color-petrol-dark: #06465c;
+  --color-ink: #173243;
+  --color-muted: #657888;
+  --color-line: rgba(7, 95, 124, 0.14);
+  --shadow-soft: 0 24px 70px rgba(23, 70, 91, 0.13);
+  --shadow-card: 0 18px 48px rgba(22, 80, 105, 0.11);
+  --radius-xl: 34px;
+  --radius-lg: 24px;
+  --radius-md: 18px;
+  --font-title: 'Playfair Display', Georgia, serif;
+  --font-body: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+  color: var(--color-ink);
+  background: var(--color-ice);
+  font-family: var(--font-body);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 70%;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 11% 8%, rgba(185, 220, 231, 0.45), transparent 28rem),
+    radial-gradient(circle at 88% 22%, rgba(217, 238, 244, 0.8), transparent 30rem),
+    linear-gradient(180deg, #fbfdfe 0%, #eef8fb 48%, #f7fbfc 100%);
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(7, 95, 124, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(7, 95, 124, 0.04) 1px, transparent 1px);
+  background-size: 54px 54px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.22), transparent 70%);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+section[id] {
+  scroll-margin-top: 120px;
+}
+
+#root {
+  min-height: 100svh;
+}
