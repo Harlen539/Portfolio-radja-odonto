@@ -34,4 +34,15 @@ O projeto foi criado com foco em uma experiência visual moderna, elegante e res
 > Adicione aqui uma imagem ou print do site depois:
 
 ```md
-![Preview do Projeto](./src/assets/preview.png)
+![Preview do Projeto](./front-end/src/assets/preview.png)
+```
+
+---
+
+## 🚀 Executar localmente
+
+```bash
+cd front-end
+npm install
+npm run dev
+```
