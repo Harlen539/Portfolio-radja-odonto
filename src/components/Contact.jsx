@@ -1,26 +1,51 @@
-import { Mail, MapPin, Send } from 'lucide-react'
+import { useState } from 'react'
+import { CheckCircle2, LoaderCircle, Mail, MapPin, Send, TriangleAlert } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa'
 import { profile } from '../data/siteData'
 import { SocialLinks } from './SocialLinks'
 
 export function Contact() {
-  function handleSubmit(event) {
+  const [submitStatus, setSubmitStatus] = useState('idle')
+
+  async function handleSubmit(event) {
     event.preventDefault()
 
-    const formData = new FormData(event.currentTarget)
-    const name = formData.get('name')
-    const email = formData.get('email')
-    const message = formData.get('message')
-    const subject = `Contato pelo portfolio - ${name}`
-    const body = [
-      `Nome: ${name}`,
-      `E-mail: ${email}`,
-      '',
-      'Mensagem:',
-      message,
-    ].join('\n')
+    const form = event.currentTarget
+    const submittedData = Object.fromEntries(new FormData(form).entries())
+    const formData = {
+      ...submittedData,
+      _replyto: submittedData.email,
+      _subject: `Contato do site - ${submittedData.name}`,
+      'Nome do remetente': submittedData.name,
+      'E-mail para resposta': submittedData.email,
+      Mensagem: submittedData.message,
+    }
 
-    window.location.href = `mailto:${profile.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    setSubmitStatus('sending')
+
+    try {
+      const response = await fetch(
+        `https://formsubmit.co/ajax/${encodeURIComponent(profile.email)}`,
+        {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        },
+      )
+      const result = await response.json()
+
+      if (!response.ok || result.success === false || result.success === 'false') {
+        throw new Error('Falha no envio da mensagem.')
+      }
+
+      form.reset()
+      setSubmitStatus('success')
+    } catch {
+      setSubmitStatus('error')
+    }
   }
 
   return (
@@ -32,8 +57,8 @@ export function Contact() {
               <span className="eyebrow">Contato</span>
               <h2>Entre em contato</h2>
               <p>
-                Vamos conversar sobre conexoes academicas, parcerias,
-                oportunidades e projetos na area odontologica.
+                Vamos conversar sobre conexões acadêmicas, parcerias,
+                oportunidades e projetos na área odontológica.
               </p>
             </div>
 
@@ -56,6 +81,15 @@ export function Contact() {
           </div>
 
           <form className="contact-form" onSubmit={handleSubmit}>
+            <input
+              className="contact-form__honey"
+              type="text"
+              name="_honey"
+              tabIndex="-1"
+              autoComplete="off"
+              aria-hidden="true"
+            />
+            <input type="hidden" name="_template" value="table" />
             <label>
               <span>Seu nome</span>
               <input name="name" type="text" placeholder="Seu nome" required />
@@ -78,11 +112,31 @@ export function Contact() {
                 required
               />
             </label>
-            <button className="contact-form__button" type="submit">
-              Enviar mensagem
-              <Send size={17} />
+            <button
+              className="contact-form__button"
+              type="submit"
+              disabled={submitStatus === 'sending'}
+            >
+              {submitStatus === 'sending' ? 'Enviando...' : 'Enviar mensagem'}
+              {submitStatus === 'sending' ? (
+                <LoaderCircle className="contact-form__spinner" size={18} />
+              ) : (
+                <Send size={17} />
+              )}
             </button>
-            <p>Responderei assim que possivel.</p>
+            {submitStatus === 'success' ? (
+              <p className="contact-form__feedback is-success" role="status">
+                <CheckCircle2 size={17} />
+                Mensagem enviada com sucesso.
+              </p>
+            ) : null}
+            {submitStatus === 'error' ? (
+              <p className="contact-form__feedback is-error" role="alert">
+                <TriangleAlert size={17} />
+                Não foi possível enviar agora. Tente novamente ou use o e-mail acima.
+              </p>
+            ) : null}
+            {submitStatus === 'idle' ? <p>Responderei assim que possível.</p> : null}
           </form>
         </div>
       </div>
