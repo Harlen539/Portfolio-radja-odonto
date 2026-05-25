@@ -1,0 +1,17 @@
+{
+  "name": "Radja Rodrigues | Odontologia",
+  "short_name": "Radja Odonto",
+  "description": "Portfolio academico de Radja Rodrigues em Odontologia.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#eef7f9",
+  "theme_color": "#075f7c",
+  "icons": [
+    {
+      "src": "/favicon.png?v=2",
+      "sizes": "500x500",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
