@@ -67,7 +67,7 @@ export function Contact() {
                 <FaWhatsapp size={20} />
                 <span>{profile.whatsappLabel}</span>
               </a>
-              <a href={profile.emailUrl}>
+              <a href={profile.emailUrl} target="_blank" rel="noreferrer">
                 <Mail size={20} />
                 <span>{profile.email}</span>
               </a>

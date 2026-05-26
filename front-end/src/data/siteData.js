@@ -16,12 +16,11 @@ export const profile = {
   whatsappLabel: '+55 (83) 98694-9357',
   whatsappUrl: 'https://wa.me/5583986949357',
   email: 'radjarodrigues16@gmail.com',
-  emailUrl: 'mailto:radjarodrigues16@gmail.com',
+  emailUrl:
+    'https://mail.google.com/mail/?view=cm&fs=1&to=radjarodrigues16%40gmail.com',
   instagramUrl:
     'https://www.instagram.com/radja.odonto?igsh=MWNhZTBiZml0ZjQxZQ==',
   linkedinUrl: 'https://www.linkedin.com/in/radja-rodrigues-523884238/',
-  RadjaEmail: 'radjarodrigues16@gmail.com',
-  RadjaEmailUrl: 'mailto:Radjarodrigues16@gmail.com',
   location: 'João Pessoa, PB',
 }
 
@@ -83,5 +82,5 @@ export const socialLinks = [
   { label: 'WhatsApp', href: profile.whatsappUrl },
   { label: 'Instagram', href: profile.instagramUrl },
   { label: 'LinkedIn', href: profile.linkedinUrl },
-  { label: 'E-mail', href: profile.RadjaEmailUrl },
+  { label: 'E-mail', href: profile.emailUrl },
 ]

@@ -637,6 +637,34 @@
   transform: translateY(-5px);
 }
 
+.case-photo-frame {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  background: #e9f5f8;
+}
+
+.case-photo-frame figcaption {
+  position: absolute;
+  left: 16px;
+  bottom: 14px;
+  padding: 7px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  border-radius: 999px;
+  color: var(--color-petrol);
+  background: rgba(255, 255, 255, 0.84);
+  backdrop-filter: blur(8px);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.case-photo-frame--large {
+  border-radius: 22px;
+  background: #e7f2f5;
+}
+
 .case-visual {
   position: relative;
   min-height: 220px;
@@ -917,11 +945,18 @@
   width: 100%;
   height: 220px;
   object-fit: cover;
+  object-position: center;
+  transition: transform 0.35s ease;
+}
+
+.case-card:hover .case-photo {
+  transform: scale(1.025);
 }
 
 .case-photo--large {
-  height: 290px;
+  height: clamp(290px, 34vh, 358px);
   border-radius: 22px;
+  object-fit: contain;
 }
 
 .case-card__content {
@@ -1105,16 +1140,14 @@
   box-shadow: 0 0 0 2px #fff, 0 0 0 4px #0b7d9e;
 }
 
-.case-modal__thumb .case-visual,
 .case-modal__thumb .case-photo {
   height: 82px;
   min-height: 82px;
   border-radius: 9px;
 }
 
-.case-modal__thumb .case-visual span {
-  transform: scale(0.42);
-  transform-origin: center bottom;
+.case-modal__thumb .case-photo-frame {
+  border-radius: 9px;
 }
 
 .case-modal__about {
@@ -1175,43 +1208,58 @@
 
 .case-modal__patient-tabs {
   display: flex;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 9px;
   margin-top: 18px;
 }
 
 .case-modal__patient {
-  position: relative;
   display: inline-flex;
-  flex: 1 1 0;
   align-items: center;
-  justify-content: center;
-  gap: 9px;
-  min-height: 56px;
-  padding: 0 14px;
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 16px;
   border: 1px solid rgba(7, 95, 124, 0.15);
-  border-radius: 12px;
+  border-radius: 999px;
   color: var(--color-petrol);
-  background: rgba(255, 255, 255, 0.7);
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.93rem;
+  background: #fff;
+  font-size: 0.82rem;
   font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background 0.2s ease;
+}
+
+.case-modal__patient:hover,
+.case-modal__patient:focus-visible {
+  border-color: rgba(7, 95, 124, 0.42);
 }
 
 .case-modal__patient.is-active {
   border-color: transparent;
   color: #fff;
-  background: linear-gradient(135deg, var(--color-petrol), #0a7998);
+  background: var(--color-petrol);
 }
 
-.case-modal__patient.is-active::after {
-  content: '';
-  position: absolute;
-  bottom: 2px;
-  width: 32px;
-  height: 3px;
+.case-modal__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.case-modal__tags span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
   border-radius: 999px;
-  background: #fff;
+  color: #0b7d9e;
+  background: rgba(217, 238, 244, 0.7);
+  font-size: 0.76rem;
+  font-weight: 700;
 }
 
 .case-modal__info-grid {
@@ -1255,6 +1303,57 @@
   color: var(--color-muted);
   font-size: 0.82rem;
   line-height: 1.48;
+}
+
+.case-modal__clinical-data {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin: 16px 0 0;
+}
+
+.case-modal__clinical-data div {
+  padding: 10px 12px;
+  border: 1px solid rgba(7, 95, 124, 0.1);
+  border-radius: 12px;
+  background: rgba(236, 246, 249, 0.54);
+}
+
+.case-modal__clinical-data div:last-child {
+  grid-column: 1 / -1;
+}
+
+.case-modal__clinical-data dt {
+  margin-bottom: 4px;
+  color: #0b7d9e;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.case-modal__clinical-data dd {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.case-modal__empty {
+  grid-column: 1 / -1;
+  display: grid;
+  justify-items: start;
+  gap: 16px;
+  min-height: 280px;
+  align-content: center;
+  padding: clamp(34px, 7vw, 70px);
+  border-radius: 20px;
+  color: var(--color-muted);
+  background: rgba(236, 246, 249, 0.54);
+}
+
+.case-modal__empty h3,
+.case-modal__empty p {
+  margin: 0;
 }
 
 .case-modal__footer {
@@ -1878,21 +1977,39 @@
     overflow-x: auto;
   }
 
-  .case-modal__patient-tabs {
-    overflow-x: auto;
-    padding-bottom: 4px;
-  }
-
-  .case-modal__patient {
-    flex: 0 0 min(170px, 54vw);
+  .case-photo-frame figcaption {
+    left: 12px;
+    bottom: 12px;
   }
 
   .case-modal__body {
     padding: 0;
   }
 
+  .case-modal__patient-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .case-modal__patient-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .case-modal__patient {
+    flex: 0 0 auto;
+  }
+
   .case-modal__info-grid {
     grid-template-columns: 1fr;
+  }
+
+  .case-modal__clinical-data {
+    grid-template-columns: 1fr;
+  }
+
+  .case-modal__clinical-data div:last-child {
+    grid-column: auto;
   }
 
   .case-modal__footer {
@@ -1987,7 +2104,6 @@
     right: 12px;
   }
 
-  .case-visual--large,
   .case-photo--large {
     min-height: 230px;
     height: 230px;

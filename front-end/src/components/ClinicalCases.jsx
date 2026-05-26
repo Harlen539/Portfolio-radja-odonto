@@ -14,16 +14,23 @@ import {
   ScanLine,
   TrendingUp,
   UserRound,
-  UsersRound,
   X,
 } from 'lucide-react'
-import { caseFilters, clinicalCases } from '../data/clinicalCases'
+import { caseCards, caseFilters, pacientes } from '../data/pacientes'
 
 const filterIcons = {
   Documentação: FileText,
   Radiografia: ScanLine,
   Estética: Sparkles,
   Prevenção: ShieldCheck,
+}
+
+const clinicalFieldLabels = {
+  tipoDeRegistro: 'Tipo de registro',
+  finalidade: 'Finalidade',
+  areaDeEstudo: 'Área de estudo',
+  nivelDoCaso: 'Nível do caso',
+  status: 'Status',
 }
 
 function ToothIcon({ size = 24, strokeWidth = 1.8, ...props }) {
@@ -46,33 +53,22 @@ function ToothIcon({ size = 24, strokeWidth = 1.8, ...props }) {
   )
 }
 
-function CaseVisual({ type, title, large = false }) {
+function CasePhoto({ photo, title, large = false, thumbnail = false }) {
   return (
-    <div
-      className={`case-visual case-visual--${type} ${large ? 'case-visual--large' : ''}`}
-      role="img"
-      aria-label={`Imagem demonstrativa: ${title}`}
+    <figure
+      className={`case-photo-frame ${large ? 'case-photo-frame--large' : ''} ${thumbnail ? 'case-photo-frame--thumb' : ''}`}
     >
-      <span />
-      <span />
-      <span />
-      <span />
-    </div>
-  )
-}
-
-function CasePhoto({ photo, title, large = false }) {
-  if (photo.src) {
-    return (
       <img
         className={`case-photo ${large ? 'case-photo--large' : ''}`}
         src={photo.src}
-        alt={`${title}: ${photo.label}`}
+        alt={photo.alt || `${title}: ${photo.label}`}
+        loading={large ? 'eager' : 'lazy'}
       />
-    )
-  }
-
-  return <CaseVisual type={photo.visual} title={`${title}: ${photo.label}`} large={large} />
+      {thumbnail ? null : (
+        <figcaption>{large ? photo.label : 'Imagem ilustrativa'}</figcaption>
+      )}
+    </figure>
+  )
 }
 
 function CaseFilter({ activeFilter, onChange }) {
@@ -98,10 +94,7 @@ function CaseFilter({ activeFilter, onChange }) {
   )
 }
 
-function CaseCard({ item, index, onOpen }) {
-  const featuredPatient = item.patients[0]
-  const featuredPhoto = featuredPatient.photos[0]
-
+function CaseCard({ caseCard, index, onOpen }) {
   return (
     <motion.article
       className="case-card"
@@ -111,21 +104,24 @@ function CaseCard({ item, index, onOpen }) {
       exit={{ opacity: 0, y: 18 }}
       transition={{ duration: 0.38, delay: index * 0.04 }}
     >
-      <CasePhoto photo={featuredPhoto} title={item.title} />
+      <CasePhoto
+        photo={{ src: caseCard.capa, label: caseCard.categoria }}
+        title={caseCard.titulo}
+      />
       <div className="case-card__content">
-        <span className="case-card__category">{item.category}</span>
-        <h3>{item.title}</h3>
-        <p>{item.description}</p>
+        <span className="case-card__category">{caseCard.subtitulo}</span>
+        <h3>{caseCard.categoria}</h3>
+        <p>{caseCard.descricaoCurta}</p>
         <div className="case-card__footer">
           <span className="case-card__tag">
-            <UsersRound size={17} strokeWidth={1.7} aria-hidden="true" />
-            {item.patients.length} pacientes
+            <UserRound size={17} strokeWidth={1.7} aria-hidden="true" />
+            {pacientes.length} pacientes
           </span>
           <button
             className="case-card__details"
             type="button"
-            onClick={() => onOpen(item)}
-            aria-label={`Ver galeria de ${item.title}`}
+            onClick={() => onOpen(caseCard.key)}
+            aria-label={`Ver galeria de ${caseCard.categoria}`}
           >
             Ver galeria
             <ArrowRight size={18} strokeWidth={1.9} aria-hidden="true" />
@@ -136,7 +132,26 @@ function CaseCard({ item, index, onOpen }) {
   )
 }
 
-function DetailCard({ icon: Icon, title, children }) {
+function CasePatientTabs({ activePatientId, onChange }) {
+  return (
+    <div className="case-modal__patient-tabs" aria-label="Selecionar paciente">
+      {pacientes.map((patient) => (
+        <button
+          className={`case-modal__patient ${activePatientId === patient.id ? 'is-active' : ''}`}
+          type="button"
+          key={patient.id}
+          aria-pressed={activePatientId === patient.id}
+          onClick={() => onChange(patient.id)}
+        >
+          <UserRound size={16} strokeWidth={1.8} aria-hidden="true" />
+          {patient.nome}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function CaseInfoItem({ icon: Icon, title, children }) {
   return (
     <div className="case-modal__info-card">
       <span className="case-modal__info-icon">
@@ -150,17 +165,18 @@ function DetailCard({ icon: Icon, title, children }) {
   )
 }
 
-function CaseModal({ item, onClose }) {
-  const [patientId, setPatientId] = useState(item.patients[0].id)
+function CaseGalleryModal({ activeCaseKey, onClose }) {
+  const [activePatientId, setActivePatientId] = useState(pacientes[0].id)
+  const [activeImageIndex, setActiveImageIndex] = useState(0)
   const activePatient =
-    item.patients.find((patient) => patient.id === patientId) || item.patients[0]
-  const [photoId, setPhotoId] = useState(activePatient.photos[0].id)
-  const activePhoto =
-    activePatient.photos.find((photo) => photo.id === photoId) || activePatient.photos[0]
+    pacientes.find((patient) => patient.id === activePatientId) || pacientes[0]
+  const activeCase = activePatient?.casos?.[activeCaseKey]
+  const activeImage =
+    activeCase?.imagens?.[activeImageIndex] || activeCase?.imagens?.[0]
 
-  const selectPatient = (patient) => {
-    setPatientId(patient.id)
-    setPhotoId(patient.photos[0].id)
+  const handlePatientChange = (patientId) => {
+    setActivePatientId(patientId)
+    setActiveImageIndex(0)
   }
 
   useEffect(() => {
@@ -207,87 +223,104 @@ function CaseModal({ item, onClose }) {
           <X size={27} strokeWidth={1.8} aria-hidden="true" />
         </button>
 
-        <aside className="case-modal__media">
-          <CasePhoto photo={activePhoto} title={item.title} large />
-          <div className="case-modal__thumbs" aria-label="Fotos do paciente selecionado">
-            {activePatient.photos.map((photo) => (
-              <button
-                className={`case-modal__thumb ${photoId === photo.id ? 'is-active' : ''}`}
-                type="button"
-                key={photo.id}
-                aria-label={`Abrir foto ${photo.label}`}
-                aria-pressed={photoId === photo.id}
-                onClick={() => setPhotoId(photo.id)}
-              >
-                <CasePhoto photo={photo} title={item.title} />
-              </button>
-            ))}
-          </div>
+        {activeCase && activeImage ? (
+          <>
+            <aside className="case-modal__media">
+              <CasePhoto photo={activeImage} title={activeCase.titulo} large />
+              <div className="case-modal__thumbs" aria-label="Imagens deste registro">
+                {activeCase.imagens.map((photo, index) => (
+                  <button
+                    className={`case-modal__thumb ${activeImageIndex === index ? 'is-active' : ''}`}
+                    type="button"
+                    key={photo.src}
+                    aria-label={`Abrir foto ${photo.label}`}
+                    aria-pressed={activeImageIndex === index}
+                    onClick={() => setActiveImageIndex(index)}
+                  >
+                    <CasePhoto photo={photo} title={activeCase.titulo} thumbnail />
+                  </button>
+                ))}
+              </div>
 
-          <div className="case-modal__about">
-            <span className="case-modal__about-icon">
-              <GraduationCap size={30} strokeWidth={1.55} aria-hidden="true" />
-            </span>
-            <div>
-              <strong>Sobre o caso</strong>
-              <p>{item.about}</p>
+              <div className="case-modal__about">
+                <span className="case-modal__about-icon">
+                  <GraduationCap size={30} strokeWidth={1.55} aria-hidden="true" />
+                </span>
+                <div>
+                  <strong>Sobre o caso demonstrativo</strong>
+                  <p>{activeCase.observacaoAcademica}</p>
+                </div>
+              </div>
+            </aside>
+
+            <div className="case-modal__body">
+              <span className="case-card__category">{activeCase.categoria}</span>
+              <h3 id="case-modal-title">{activeCase.titulo}</h3>
+              <p className="case-modal__description">{activeCase.descricaoCurta}</p>
+
+              <CasePatientTabs
+                activePatientId={activePatientId}
+                onChange={handlePatientChange}
+              />
+
+              <div className="case-modal__tags" aria-label="Marcadores do caso">
+                {activeCase.tags.map((tag) => (
+                  <span key={tag}>{tag}</span>
+                ))}
+              </div>
+
+              <div className="case-modal__info-grid">
+                <CaseInfoItem icon={UserRound} title="Paciente / Idade">
+                  {activePatient.nome} · {activePatient.idade}
+                </CaseInfoItem>
+                <CaseInfoItem icon={ToothIcon} title="Queixa principal">
+                  {activeCase.queixaPrincipal}
+                </CaseInfoItem>
+                <CaseInfoItem icon={Search} title="Causa / Observação inicial">
+                  {activeCase.causaObservacaoInicial}
+                </CaseInfoItem>
+                <CaseInfoItem icon={Camera} title="Conduta realizada">
+                  {activeCase.condutaRealizada}
+                </CaseInfoItem>
+                <CaseInfoItem icon={ClipboardList} title="O que foi feito">
+                  {activeCase.oQueFoiFeito}
+                </CaseInfoItem>
+                <CaseInfoItem icon={TrendingUp} title="Resultado / Aprendizado">
+                  {activeCase.resultadoAprendizado}
+                </CaseInfoItem>
+              </div>
+
+              <dl className="case-modal__clinical-data" aria-label="Dados clínicos do registro">
+                {Object.entries(activeCase.dadosClinicos).map(([key, value]) => (
+                  <div key={key}>
+                    <dt>{clinicalFieldLabels[key]}</dt>
+                    <dd>{value}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
-          </div>
-        </aside>
-
-        <div className="case-modal__body">
-          <span className="case-card__category">{item.category}</span>
-          <h3 id="case-modal-title">{item.title}</h3>
-          <p className="case-modal__description">{item.description}</p>
-
-          <div className="case-modal__patient-tabs" aria-label="Pacientes deste caso">
-            {item.patients.map((patient) => (
-              <button
-                className={`case-modal__patient ${patientId === patient.id ? 'is-active' : ''}`}
-                type="button"
-                key={patient.id}
-                aria-pressed={patientId === patient.id}
-                onClick={() => selectPatient(patient)}
-              >
-                <UserRound size={22} strokeWidth={1.7} aria-hidden="true" />
-                {patient.name}
+            <footer className="case-modal__footer">
+              <ShieldCheck size={34} strokeWidth={1.45} aria-hidden="true" />
+              <p>
+                {activeCase.observacaoAcademica} Imagens ilustrativas e dados
+                fictícios, apresentados com finalidade acadêmica.
+              </p>
+              <button className="case-modal__back" type="button" onClick={onClose}>
+                <ArrowLeft size={19} aria-hidden="true" />
+                Voltar para galeria
               </button>
-            ))}
+            </footer>
+          </>
+        ) : (
+          <div className="case-modal__empty">
+            <h3 id="case-modal-title">{activePatient.nome}</h3>
+            <p>Este paciente ainda não possui registros para este componente.</p>
+            <CasePatientTabs
+              activePatientId={activePatientId}
+              onChange={handlePatientChange}
+            />
           </div>
-
-          <div className="case-modal__info-grid">
-            <DetailCard icon={UserRound} title="Idade">
-              {activePatient.age}
-            </DetailCard>
-            <DetailCard icon={ToothIcon} title="Queixa principal">
-              {activePatient.complaint}
-            </DetailCard>
-            <DetailCard icon={Search} title="Causa / Observação inicial">
-              {activePatient.observation}
-            </DetailCard>
-            <DetailCard icon={Camera} title="Conduta realizada">
-              {activePatient.conduct}
-            </DetailCard>
-            <DetailCard icon={ClipboardList} title="O que foi feito">
-              {activePatient.completed}
-            </DetailCard>
-            <DetailCard icon={TrendingUp} title="Resultado / Aprendizado">
-              {activePatient.result}
-            </DetailCard>
-          </div>
-        </div>
-
-        <footer className="case-modal__footer">
-          <ShieldCheck size={34} strokeWidth={1.45} aria-hidden="true" />
-          <p>
-            Dados apresentados com finalidade acadêmica, preservando privacidade e
-            responsabilidade profissional.
-          </p>
-          <button className="case-modal__back" type="button" onClick={onClose}>
-            <ArrowLeft size={19} aria-hidden="true" />
-            Voltar para galeria
-          </button>
-        </footer>
+        )}
       </motion.div>
     </motion.div>
   )
@@ -296,15 +329,15 @@ function CaseModal({ item, onClose }) {
 export function ClinicalCases() {
   const carouselRef = useRef(null)
   const [activeFilter, setActiveFilter] = useState('Todos')
-  const [selectedCase, setSelectedCase] = useState(null)
+  const [activeCaseKey, setActiveCaseKey] = useState(null)
   const [currentCase, setCurrentCase] = useState(0)
 
-  const visibleCases = useMemo(() => {
+  const visibleCards = useMemo(() => {
     if (activeFilter === 'Todos') {
-      return clinicalCases
+      return caseCards
     }
 
-    return clinicalCases.filter((item) => item.filter === activeFilter)
+    return caseCards.filter((card) => card.filtro === activeFilter)
   }, [activeFilter])
 
   const scrollCase = (direction) => {
@@ -319,7 +352,7 @@ export function ClinicalCases() {
     const cardWidth = card?.getBoundingClientRect().width || carousel.clientWidth
     const amount = cardWidth + gap
     const nextIndex = direction === 'next' ? currentCase + 1 : currentCase - 1
-    const clampedIndex = Math.max(0, Math.min(visibleCases.length - 1, nextIndex))
+    const clampedIndex = Math.max(0, Math.min(visibleCards.length - 1, nextIndex))
 
     carousel.scrollTo({
       left: clampedIndex * amount,
@@ -343,7 +376,7 @@ export function ClinicalCases() {
       const amount = cardWidth + gap
       const nextIndex = amount ? Math.round(carousel.scrollLeft / amount) : 0
 
-      setCurrentCase(Math.max(0, Math.min(visibleCases.length - 1, nextIndex)))
+      setCurrentCase(Math.max(0, Math.min(visibleCards.length - 1, nextIndex)))
     }
 
     carousel.addEventListener('scroll', updateCurrentCase, { passive: true })
@@ -354,7 +387,7 @@ export function ClinicalCases() {
       carousel.removeEventListener('scroll', updateCurrentCase)
       window.removeEventListener('resize', updateCurrentCase)
     }
-  }, [visibleCases.length])
+  }, [visibleCards.length])
 
   const handleFilterChange = (filter) => {
     setActiveFilter(filter)
@@ -395,18 +428,18 @@ export function ClinicalCases() {
 
         <motion.div className="clinical__grid" ref={carouselRef} layout>
           <AnimatePresence mode="popLayout">
-            {visibleCases.map((item, index) => (
+            {visibleCards.map((caseCard, index) => (
               <CaseCard
-                key={item.id}
-                item={item}
+                key={caseCard.key}
+                caseCard={caseCard}
                 index={index}
-                onOpen={setSelectedCase}
+                onOpen={setActiveCaseKey}
               />
             ))}
           </AnimatePresence>
         </motion.div>
 
-        {currentCase < visibleCases.length - 1 ? (
+        {currentCase < visibleCards.length - 1 ? (
           <button
             className="procedure-carousel__control procedure-carousel__control--next clinical-carousel__control"
             type="button"
@@ -430,11 +463,11 @@ export function ClinicalCases() {
       </div>
 
       <AnimatePresence>
-        {selectedCase ? (
-          <CaseModal
-            key={selectedCase.id}
-            item={selectedCase}
-            onClose={() => setSelectedCase(null)}
+        {activeCaseKey ? (
+          <CaseGalleryModal
+            key={activeCaseKey}
+            activeCaseKey={activeCaseKey}
+            onClose={() => setActiveCaseKey(null)}
           />
         ) : null}
       </AnimatePresence>
