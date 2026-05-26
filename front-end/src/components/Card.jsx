@@ -1,18 +1,13 @@
 import { motion } from 'framer-motion'
-import { ArrowRight } from 'lucide-react'
 
 export function Card({
   title,
   text,
-  href,
-  cta,
   icon: Icon,
-  children,
   className = '',
   onClick,
   ariaLabel,
 }) {
-  const external = href?.startsWith('http') || href?.startsWith('mailto:')
   const isImageIcon = typeof Icon === 'string'
   const interactive = typeof onClick === 'function'
 
@@ -54,18 +49,6 @@ export function Card({
       ) : null}
       <h3>{title}</h3>
       <p>{text}</p>
-      {children}
-      {href && cta ? (
-        <a
-          className="card__link"
-          href={href}
-          target={external ? '_blank' : undefined}
-          rel={external ? 'noreferrer' : undefined}
-        >
-          <span>{cta}</span>
-          <ArrowRight size={17} strokeWidth={1.8} aria-hidden="true" />
-        </a>
-      ) : null}
     </motion.article>
   )
 }

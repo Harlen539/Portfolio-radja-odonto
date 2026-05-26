@@ -1,10 +1,13 @@
 import { useState } from 'react'
 import { CheckCircle2, LoaderCircle, Mail, MapPin, Send, TriangleAlert } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa'
-import { profile } from '../data/siteData'
+import { getSiteData } from '../data/siteData'
 import { SocialLinks } from './SocialLinks'
+import { useLanguage } from '../context/languageContext'
 
 export function Contact() {
+  const { language, copy } = useLanguage()
+  const { profile } = getSiteData(language)
   const [submitStatus, setSubmitStatus] = useState('idle')
 
   async function handleSubmit(event) {
@@ -15,10 +18,10 @@ export function Contact() {
     const formData = {
       ...submittedData,
       _replyto: submittedData.email,
-      _subject: `Contato do site - ${submittedData.name}`,
-      'Nome do remetente': submittedData.name,
-      'E-mail para resposta': submittedData.email,
-      Mensagem: submittedData.message,
+      _subject: `${copy.contact.subject} - ${submittedData.name}`,
+      Name: submittedData.name,
+      Email: submittedData.email,
+      Message: submittedData.message,
     }
 
     setSubmitStatus('sending')
@@ -54,12 +57,9 @@ export function Contact() {
         <div className="contact__layout">
           <div>
             <div className="section-heading">
-              <span className="eyebrow">Contato</span>
-              <h2>Entre em contato</h2>
-              <p>
-                Vamos conversar sobre conexões acadêmicas, parcerias,
-                oportunidades e projetos na área odontológica.
-              </p>
+              <span className="eyebrow">{copy.contact.eyebrow}</span>
+              <h2>{copy.contact.title}</h2>
+              <p>{copy.contact.intro}</p>
             </div>
 
             <div className="contact__details">
@@ -91,23 +91,23 @@ export function Contact() {
             />
             <input type="hidden" name="_template" value="table" />
             <label>
-              <span>Seu nome</span>
-              <input name="name" type="text" placeholder="Seu nome" required />
+              <span>{copy.contact.name}</span>
+              <input name="name" type="text" placeholder={copy.contact.name} required />
             </label>
             <label>
-              <span>Seu e-mail</span>
+              <span>{copy.contact.email}</span>
               <input
                 name="email"
                 type="email"
-                placeholder="Seu e-mail"
+                placeholder={copy.contact.email}
                 required
               />
             </label>
             <label>
-              <span>Sua mensagem</span>
+              <span>{copy.contact.message}</span>
               <textarea
                 name="message"
-                placeholder="Sua mensagem"
+                placeholder={copy.contact.message}
                 rows="6"
                 required
               />
@@ -117,7 +117,7 @@ export function Contact() {
               type="submit"
               disabled={submitStatus === 'sending'}
             >
-              {submitStatus === 'sending' ? 'Enviando...' : 'Enviar mensagem'}
+              {submitStatus === 'sending' ? copy.contact.sending : copy.contact.send}
               {submitStatus === 'sending' ? (
                 <LoaderCircle className="contact-form__spinner" size={18} />
               ) : (
@@ -127,16 +127,16 @@ export function Contact() {
             {submitStatus === 'success' ? (
               <p className="contact-form__feedback is-success" role="status">
                 <CheckCircle2 size={17} />
-                Mensagem enviada com sucesso.
+                {copy.contact.success}
               </p>
             ) : null}
             {submitStatus === 'error' ? (
               <p className="contact-form__feedback is-error" role="alert">
                 <TriangleAlert size={17} />
-                Não foi possível enviar agora. Tente novamente ou use o e-mail acima.
+                {copy.contact.error}
               </p>
             ) : null}
-            {submitStatus === 'idle' ? <p>Responderei assim que possível.</p> : null}
+            {submitStatus === 'idle' ? <p>{copy.contact.reply}</p> : null}
           </form>
         </div>
       </div>

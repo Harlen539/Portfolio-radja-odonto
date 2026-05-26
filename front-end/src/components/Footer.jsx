@@ -1,15 +1,18 @@
 import { Logo } from './Logo'
 import { SocialLinks } from './SocialLinks'
+import { useLanguage } from '../context/languageContext'
 
 export function Footer() {
+  const { copy } = useLanguage()
+
   return (
     <footer className="site-footer">
       <div className="site-footer__inner">
         <p className="site-footer__copy">
-          © 2026 Radja Rodrigues Odontologia. Todos os direitos reservados.
+          {copy.footer}
         </p>
 
-        <Logo compact className="site-footer__logo" />
+        <Logo compact className="site-footer__logo" alt={copy.logoAlt} />
 
         <SocialLinks
           className="site-footer__social"

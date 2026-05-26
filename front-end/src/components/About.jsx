@@ -1,7 +1,11 @@
 import { motion } from 'framer-motion'
-import { values } from '../data/siteData'
+import { getSiteData } from '../data/siteData'
+import { useLanguage } from '../context/languageContext'
 
 export function About() {
+  const { language, copy } = useLanguage()
+  const { values } = getSiteData(language)
+
   return (
     <section className="about section-shell" id="sobre">
       <motion.div
@@ -11,8 +15,8 @@ export function About() {
         viewport={{ once: true, amount: 0.35 }}
         transition={{ duration: 0.55 }}
       >
-        <span className="eyebrow">Trajetória</span>
-        <h2>Sobre mim</h2>
+        <span className="eyebrow">{copy.about.eyebrow}</span>
+        <h2>{copy.about.title}</h2>
       </motion.div>
 
       <div className="about__grid">
@@ -23,14 +27,7 @@ export function About() {
           viewport={{ once: true, amount: 0.25 }}
           transition={{ duration: 0.6 }}
         >
-          <p>
-            Sou Radja Rodrigues, estudante de Odontologia no 7º período pela
-            UNIPÊ, em João Pessoa/PB. Minha trajetória é guiada pelo cuidado,
-            pela dedicação aos estudos e pelo desejo de transformar vidas
-            através do sorriso. Busco evoluir constantemente, unindo
-            conhecimento técnico, sensibilidade e responsabilidade em cada
-            etapa da minha formação.
-          </p>
+          <p>{copy.about.text}</p>
 
           <div className="value-grid">
             {values.map(({ title, icon: Icon }) => (

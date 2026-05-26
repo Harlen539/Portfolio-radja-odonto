@@ -1,16 +1,18 @@
-import { FaGithub, FaInstagram, FaLinkedinIn, FaWhatsapp } from 'react-icons/fa'
+import { FaInstagram, FaLinkedinIn, FaWhatsapp } from 'react-icons/fa'
 import { Mail } from 'lucide-react'
-import { socialLinks } from '../data/siteData'
+import { getSiteData } from '../data/siteData'
+import { useLanguage } from '../context/languageContext'
 
 const icons = {
   WhatsApp: FaWhatsapp,
   Instagram: FaInstagram,
   LinkedIn: FaLinkedinIn,
-  GitHub: FaGithub,
   'E-mail': Mail,
 }
 
 export function SocialLinks({ className = '', labels }) {
+  const { language } = useLanguage()
+  const { socialLinks } = getSiteData(language)
   const visibleLinks = labels
     ? socialLinks.filter(({ label }) => labels.includes(label))
     : socialLinks

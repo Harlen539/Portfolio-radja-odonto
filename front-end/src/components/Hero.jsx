@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion'
 import { Heart, Quote, Sparkles } from 'lucide-react'
 import radjaProfile from '../assets/radja-profile.jpg'
-import { profile } from '../data/siteData'
+import { getSiteData } from '../data/siteData'
+import { useLanguage } from '../context/languageContext'
 
 function ToothOutline() {
   return (
@@ -18,6 +19,9 @@ function ToothOutline() {
 }
 
 export function Hero() {
+  const { language, copy } = useLanguage()
+  const { profile } = getSiteData(language)
+
   return (
     <section className="hero-section section-shell" id="inicio">
       <div className="hero-section__decor hero-section__decor--tooth">
@@ -34,7 +38,7 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: 'easeOut' }}
         >
-          <span className="eyebrow">Portfólio acadêmico em odontologia</span>
+          <span className="eyebrow">{copy.hero.eyebrow}</span>
           <h1>{profile.name}</h1>
         </motion.div>
 
@@ -47,7 +51,7 @@ export function Hero() {
           <div className="hero-portrait__ring">
             <img
               src={radjaProfile}
-              alt="Radja Rodrigues usando jaleco odontológico branco"
+              alt={copy.hero.imageAlt}
             />
           </div>
           <span className="hero-portrait__dot hero-portrait__dot--top" />

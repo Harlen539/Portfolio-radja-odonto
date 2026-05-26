@@ -6,13 +6,8 @@ import periodontiaIcon from '../assets/procedures/periodontia.png'
 import prevencaoIcon from '../assets/procedures/prevencao.png'
 import proteseIcon from '../assets/procedures/protese.png'
 
-export const profile = {
+const contactProfile = {
   name: 'Radja Rodrigues',
-  area: 'Odontologia',
-  subtitle: 'Estudante de Odontologia · 7º Período · UNIPÊ - João Pessoa, PB',
-  intro:
-    'Apaixonada por sorrisos e pela transformação que a odontologia proporciona na vida das pessoas. Aqui compartilho minha jornada acadêmica, conhecimentos, procedimentos estudados e casos clínicos que refletem dedicação, evolução e amor pela profissão.',
-  highlight: 'Cuidar de sorrisos é transformar histórias.',
   whatsappLabel: '+55 (83) 98694-9357',
   whatsappUrl: 'https://wa.me/5583986949357',
   email: 'radjarodrigues16@gmail.com',
@@ -24,63 +19,82 @@ export const profile = {
   location: 'João Pessoa, PB',
 }
 
-export const menuItems = [
-  { label: 'Início', href: '#inicio' },
-  { label: 'Sobre mim', href: '#sobre' },
-  { label: 'Procedimentos', href: '#procedimentos' },
-  { label: 'Casos clínicos', href: '#casos' },
-  { label: 'Contato', href: '#contato' },
+const localizedSiteData = {
+  pt: {
+    profile: {
+      highlight: 'Cuidar de sorrisos é transformar histórias.',
+    },
+    menuItems: [
+      { label: 'Início', href: '#inicio' },
+      { label: 'Sobre mim', href: '#sobre' },
+      { label: 'Procedimentos', href: '#procedimentos' },
+      { label: 'Casos clínicos', href: '#casos' },
+      { label: 'Contato', href: '#contato' },
+    ],
+    values: ['Cuidado', 'Ética', 'Dedicação', 'Evolução'],
+    procedures: [
+      ['Dentística', 'Estudo da estética, função e restauração dental com atenção ao equilíbrio do sorriso.'],
+      ['Periodontia', 'Vivência acadêmica voltada aos tecidos de suporte, saúde gengival e prevenção.'],
+      ['Endodontia', 'Interesse clínico em diagnóstico, planejamento e cuidado da estrutura interna dental.'],
+      ['Prótese', 'Áreas de estudo ligadas à reabilitação, função mastigatória e harmonia oral.'],
+      ['Ortodontia', 'Jornada acadêmica no entendimento da oclusão, alinhamento e desenvolvimento facial.'],
+      ['Prevenção', 'Base essencial do cuidado odontológico, com foco em orientação e promoção de saúde.'],
+    ],
+  },
+  en: {
+    profile: {
+      highlight: 'Caring for smiles means transforming stories.',
+    },
+    menuItems: [
+      { label: 'Home', href: '#inicio' },
+      { label: 'About me', href: '#sobre' },
+      { label: 'Procedures', href: '#procedimentos' },
+      { label: 'Clinical cases', href: '#casos' },
+      { label: 'Contact', href: '#contato' },
+    ],
+    values: ['Care', 'Ethics', 'Dedication', 'Growth'],
+    procedures: [
+      ['Restorative dentistry', 'Study of dental aesthetics, function, and restoration with attention to smile balance.'],
+      ['Periodontics', 'Academic experience focused on supporting tissues, gum health, and prevention.'],
+      ['Endodontics', 'Clinical interest in diagnosis, planning, and care of internal dental structures.'],
+      ['Prosthodontics', 'Fields of study related to rehabilitation, chewing function, and oral harmony.'],
+      ['Orthodontics', 'Academic journey in understanding occlusion, alignment, and facial development.'],
+      ['Prevention', 'An essential foundation of dental care, focused on guidance and health promotion.'],
+    ],
+  },
+}
+
+const valueIcons = [Heart, ShieldCheck, Target, Sparkles]
+const procedureIcons = [
+  dentisticaIcon,
+  periodontiaIcon,
+  endodontiaIcon,
+  proteseIcon,
+  ortodontiaIcon,
+  prevencaoIcon,
 ]
 
-export const values = [
-  { title: 'Cuidado', icon: Heart },
-  { title: 'Ética', icon: ShieldCheck },
-  { title: 'Dedicação', icon: Target },
-  { title: 'Evolução', icon: Sparkles },
-]
+export function getSiteData(language = 'pt') {
+  const content = localizedSiteData[language] || localizedSiteData.pt
+  const profile = { ...contactProfile, ...content.profile }
 
-export const procedures = [
-  {
-    title: 'Dentística',
-    description:
-      'Estudo da estética, função e restauração dental com atenção ao equilíbrio do sorriso.',
-    icon: dentisticaIcon,
-  },
-  {
-    title: 'Periodontia',
-    description:
-      'Vivência acadêmica voltada aos tecidos de suporte, saúde gengival e prevenção.',
-    icon: periodontiaIcon,
-  },
-  {
-    title: 'Endodontia',
-    description:
-      'Interesse clínico em diagnóstico, planejamento e cuidado da estrutura interna dental.',
-    icon: endodontiaIcon,
-  },
-  {
-    title: 'Prótese',
-    description:
-      'Áreas de estudo ligadas à reabilitação, função mastigatória e harmonia oral.',
-    icon: proteseIcon,
-  },
-  {
-    title: 'Ortodontia',
-    description:
-      'Jornada acadêmica no entendimento da oclusão, alinhamento e desenvolvimento facial.',
-    icon: ortodontiaIcon,
-  },
-  {
-    title: 'Prevenção',
-    description:
-      'Base essencial do cuidado odontológico, com foco em orientação e promoção de saúde.',
-    icon: prevencaoIcon,
-  },
-]
-
-export const socialLinks = [
-  { label: 'WhatsApp', href: profile.whatsappUrl },
-  { label: 'Instagram', href: profile.instagramUrl },
-  { label: 'LinkedIn', href: profile.linkedinUrl },
-  { label: 'E-mail', href: profile.emailUrl },
-]
+  return {
+    profile,
+    menuItems: content.menuItems,
+    values: content.values.map((title, index) => ({
+      title,
+      icon: valueIcons[index],
+    })),
+    procedures: content.procedures.map(([title, description], index) => ({
+      title,
+      description,
+      icon: procedureIcons[index],
+    })),
+    socialLinks: [
+      { label: 'WhatsApp', href: profile.whatsappUrl },
+      { label: 'Instagram', href: profile.instagramUrl },
+      { label: 'LinkedIn', href: profile.linkedinUrl },
+      { label: 'E-mail', href: profile.emailUrl },
+    ],
+  }
+}

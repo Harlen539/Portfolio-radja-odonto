@@ -16,21 +16,18 @@ import {
   UserRound,
   X,
 } from 'lucide-react'
-import { caseCards, caseFilters, pacientes } from '../data/pacientes'
+import { getClinicalData } from '../data/pacientes'
+import { useLanguage } from '../context/languageContext'
 
 const filterIcons = {
   Documentação: FileText,
+  Documentation: FileText,
   Radiografia: ScanLine,
+  Radiography: ScanLine,
   Estética: Sparkles,
+  Aesthetics: Sparkles,
   Prevenção: ShieldCheck,
-}
-
-const clinicalFieldLabels = {
-  tipoDeRegistro: 'Tipo de registro',
-  finalidade: 'Finalidade',
-  areaDeEstudo: 'Área de estudo',
-  nivelDoCaso: 'Nível do caso',
-  status: 'Status',
+  Prevention: ShieldCheck,
 }
 
 function ToothIcon({ size = 24, strokeWidth = 1.8, ...props }) {
@@ -53,7 +50,7 @@ function ToothIcon({ size = 24, strokeWidth = 1.8, ...props }) {
   )
 }
 
-function CasePhoto({ photo, title, large = false, thumbnail = false }) {
+function CasePhoto({ photo, title, copy, large = false, thumbnail = false }) {
   return (
     <figure
       className={`case-photo-frame ${large ? 'case-photo-frame--large' : ''} ${thumbnail ? 'case-photo-frame--thumb' : ''}`}
@@ -65,25 +62,25 @@ function CasePhoto({ photo, title, large = false, thumbnail = false }) {
         loading={large ? 'eager' : 'lazy'}
       />
       {thumbnail ? null : (
-        <figcaption>{large ? photo.label : 'Imagem ilustrativa'}</figcaption>
+        <figcaption>{large ? photo.label : copy.illustrativeImage}</figcaption>
       )}
     </figure>
   )
 }
 
-function CaseFilter({ activeFilter, onChange }) {
+function CaseFilter({ caseFilters, copy, activeFilterIndex, onChange }) {
   return (
-    <div className="case-filters" aria-label="Filtros de casos clínicos">
-      {caseFilters.map((filter) => {
+    <div className="case-filters" aria-label={copy.filtersLabel}>
+      {caseFilters.map((filter, index) => {
         const Icon = filterIcons[filter]
 
         return (
           <button
-            className={`case-filter ${activeFilter === filter ? 'is-active' : ''}`}
+            className={`case-filter ${activeFilterIndex === index ? 'is-active' : ''}`}
             type="button"
             key={filter}
-            aria-pressed={activeFilter === filter}
-            onClick={() => onChange(filter)}
+            aria-pressed={activeFilterIndex === index}
+            onClick={() => onChange(index)}
           >
             {Icon ? <Icon size={18} strokeWidth={1.8} aria-hidden="true" /> : null}
             <span>{filter}</span>
@@ -94,7 +91,7 @@ function CaseFilter({ activeFilter, onChange }) {
   )
 }
 
-function CaseCard({ caseCard, index, onOpen }) {
+function CaseCard({ caseCard, patientCount, copy, index, onOpen }) {
   return (
     <motion.article
       className="case-card"
@@ -107,6 +104,7 @@ function CaseCard({ caseCard, index, onOpen }) {
       <CasePhoto
         photo={{ src: caseCard.capa, label: caseCard.categoria }}
         title={caseCard.titulo}
+        copy={copy}
       />
       <div className="case-card__content">
         <span className="case-card__category">{caseCard.subtitulo}</span>
@@ -115,15 +113,15 @@ function CaseCard({ caseCard, index, onOpen }) {
         <div className="case-card__footer">
           <span className="case-card__tag">
             <UserRound size={17} strokeWidth={1.7} aria-hidden="true" />
-            {pacientes.length} pacientes
+            {patientCount} {copy.patients}
           </span>
           <button
             className="case-card__details"
             type="button"
             onClick={() => onOpen(caseCard.key)}
-            aria-label={`Ver galeria de ${caseCard.categoria}`}
+            aria-label={`${copy.galleryAria} ${caseCard.categoria}`}
           >
-            Ver galeria
+            {copy.gallery}
             <ArrowRight size={18} strokeWidth={1.9} aria-hidden="true" />
           </button>
         </div>
@@ -132,9 +130,9 @@ function CaseCard({ caseCard, index, onOpen }) {
   )
 }
 
-function CasePatientTabs({ activePatientId, onChange }) {
+function CasePatientTabs({ pacientes, copy, activePatientId, onChange }) {
   return (
-    <div className="case-modal__patient-tabs" aria-label="Selecionar paciente">
+    <div className="case-modal__patient-tabs" aria-label={copy.selectPatient}>
       {pacientes.map((patient) => (
         <button
           className={`case-modal__patient ${activePatientId === patient.id ? 'is-active' : ''}`}
@@ -165,7 +163,7 @@ function CaseInfoItem({ icon: Icon, title, children }) {
   )
 }
 
-function CaseGalleryModal({ activeCaseKey, onClose }) {
+function CaseGalleryModal({ activeCaseKey, pacientes, copy, onClose }) {
   const [activePatientId, setActivePatientId] = useState(pacientes[0].id)
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const activePatient =
@@ -217,7 +215,7 @@ function CaseGalleryModal({ activeCaseKey, onClose }) {
         <button
           className="case-modal__close"
           type="button"
-          aria-label="Fechar galeria do caso"
+          aria-label={copy.closeGallery}
           onClick={onClose}
         >
           <X size={27} strokeWidth={1.8} aria-hidden="true" />
@@ -226,18 +224,18 @@ function CaseGalleryModal({ activeCaseKey, onClose }) {
         {activeCase && activeImage ? (
           <>
             <aside className="case-modal__media">
-              <CasePhoto photo={activeImage} title={activeCase.titulo} large />
-              <div className="case-modal__thumbs" aria-label="Imagens deste registro">
+              <CasePhoto photo={activeImage} title={activeCase.titulo} copy={copy} large />
+              <div className="case-modal__thumbs" aria-label={copy.photos}>
                 {activeCase.imagens.map((photo, index) => (
                   <button
                     className={`case-modal__thumb ${activeImageIndex === index ? 'is-active' : ''}`}
                     type="button"
                     key={photo.src}
-                    aria-label={`Abrir foto ${photo.label}`}
+                    aria-label={`${copy.openPhoto} ${photo.label}`}
                     aria-pressed={activeImageIndex === index}
                     onClick={() => setActiveImageIndex(index)}
                   >
-                    <CasePhoto photo={photo} title={activeCase.titulo} thumbnail />
+                    <CasePhoto photo={photo} title={activeCase.titulo} copy={copy} thumbnail />
                   </button>
                 ))}
               </div>
@@ -247,7 +245,7 @@ function CaseGalleryModal({ activeCaseKey, onClose }) {
                   <GraduationCap size={30} strokeWidth={1.55} aria-hidden="true" />
                 </span>
                 <div>
-                  <strong>Sobre o caso demonstrativo</strong>
+                  <strong>{copy.aboutCase}</strong>
                   <p>{activeCase.observacaoAcademica}</p>
                 </div>
               </div>
@@ -259,41 +257,43 @@ function CaseGalleryModal({ activeCaseKey, onClose }) {
               <p className="case-modal__description">{activeCase.descricaoCurta}</p>
 
               <CasePatientTabs
+                pacientes={pacientes}
+                copy={copy}
                 activePatientId={activePatientId}
                 onChange={handlePatientChange}
               />
 
-              <div className="case-modal__tags" aria-label="Marcadores do caso">
+              <div className="case-modal__tags" aria-label={copy.tags}>
                 {activeCase.tags.map((tag) => (
                   <span key={tag}>{tag}</span>
                 ))}
               </div>
 
               <div className="case-modal__info-grid">
-                <CaseInfoItem icon={UserRound} title="Paciente / Idade">
+                <CaseInfoItem icon={UserRound} title={copy.infoLabels[0]}>
                   {activePatient.nome} · {activePatient.idade}
                 </CaseInfoItem>
-                <CaseInfoItem icon={ToothIcon} title="Queixa principal">
+                <CaseInfoItem icon={ToothIcon} title={copy.infoLabels[1]}>
                   {activeCase.queixaPrincipal}
                 </CaseInfoItem>
-                <CaseInfoItem icon={Search} title="Causa / Observação inicial">
+                <CaseInfoItem icon={Search} title={copy.infoLabels[2]}>
                   {activeCase.causaObservacaoInicial}
                 </CaseInfoItem>
-                <CaseInfoItem icon={Camera} title="Conduta realizada">
+                <CaseInfoItem icon={Camera} title={copy.infoLabels[3]}>
                   {activeCase.condutaRealizada}
                 </CaseInfoItem>
-                <CaseInfoItem icon={ClipboardList} title="O que foi feito">
+                <CaseInfoItem icon={ClipboardList} title={copy.infoLabels[4]}>
                   {activeCase.oQueFoiFeito}
                 </CaseInfoItem>
-                <CaseInfoItem icon={TrendingUp} title="Resultado / Aprendizado">
+                <CaseInfoItem icon={TrendingUp} title={copy.infoLabels[5]}>
                   {activeCase.resultadoAprendizado}
                 </CaseInfoItem>
               </div>
 
-              <dl className="case-modal__clinical-data" aria-label="Dados clínicos do registro">
+              <dl className="case-modal__clinical-data" aria-label={copy.clinicalData}>
                 {Object.entries(activeCase.dadosClinicos).map(([key, value]) => (
                   <div key={key}>
-                    <dt>{clinicalFieldLabels[key]}</dt>
+                    <dt>{copy.clinicalFieldLabels[key]}</dt>
                     <dd>{value}</dd>
                   </div>
                 ))}
@@ -302,20 +302,21 @@ function CaseGalleryModal({ activeCaseKey, onClose }) {
             <footer className="case-modal__footer">
               <ShieldCheck size={34} strokeWidth={1.45} aria-hidden="true" />
               <p>
-                {activeCase.observacaoAcademica} Imagens ilustrativas e dados
-                fictícios, apresentados com finalidade acadêmica.
+                {activeCase.observacaoAcademica} {copy.disclaimer}
               </p>
               <button className="case-modal__back" type="button" onClick={onClose}>
                 <ArrowLeft size={19} aria-hidden="true" />
-                Voltar para galeria
+                {copy.back}
               </button>
             </footer>
           </>
         ) : (
           <div className="case-modal__empty">
             <h3 id="case-modal-title">{activePatient.nome}</h3>
-            <p>Este paciente ainda não possui registros para este componente.</p>
+            <p>{copy.empty}</p>
             <CasePatientTabs
+              pacientes={pacientes}
+              copy={copy}
               activePatientId={activePatientId}
               onChange={handlePatientChange}
             />
@@ -327,18 +328,21 @@ function CaseGalleryModal({ activeCaseKey, onClose }) {
 }
 
 export function ClinicalCases() {
+  const { language, copy: interfaceCopy } = useLanguage()
+  const copy = interfaceCopy.clinical
+  const { caseFilters, caseCards, pacientes } = getClinicalData(language)
   const carouselRef = useRef(null)
-  const [activeFilter, setActiveFilter] = useState('Todos')
+  const [activeFilterIndex, setActiveFilterIndex] = useState(0)
   const [activeCaseKey, setActiveCaseKey] = useState(null)
   const [currentCase, setCurrentCase] = useState(0)
 
   const visibleCards = useMemo(() => {
-    if (activeFilter === 'Todos') {
+    if (activeFilterIndex === 0) {
       return caseCards
     }
 
-    return caseCards.filter((card) => card.filtro === activeFilter)
-  }, [activeFilter])
+    return caseCards.filter((card) => card.filtro === caseFilters[activeFilterIndex])
+  }, [activeFilterIndex, caseCards, caseFilters])
 
   const scrollCase = (direction) => {
     const carousel = carouselRef.current
@@ -389,8 +393,8 @@ export function ClinicalCases() {
     }
   }, [visibleCards.length])
 
-  const handleFilterChange = (filter) => {
-    setActiveFilter(filter)
+  const handleFilterChange = (filterIndex) => {
+    setActiveFilterIndex(filterIndex)
     setCurrentCase(0)
     carouselRef.current?.scrollTo({ left: 0 })
   }
@@ -399,27 +403,29 @@ export function ClinicalCases() {
     <section className="clinical section-shell" id="casos">
       <div className="clinical__header">
         <div className="section-heading">
-          <span className="eyebrow">Portfólio clínico</span>
-          <h2>Galeria de casos clínicos</h2>
-          <p>
-            Registros acadêmicos e estudos de casos acompanhados durante minha
-            formação.
-          </p>
+          <span className="eyebrow">{copy.eyebrow}</span>
+          <h2>{copy.title}</h2>
+          <p>{copy.intro}</p>
         </div>
         <span className="academic-note">
           <ShieldCheck size={34} strokeWidth={1.45} aria-hidden="true" />
-          Conteúdo com finalidade acadêmica e demonstrativa.
+          {copy.note}
         </span>
       </div>
 
-      <CaseFilter activeFilter={activeFilter} onChange={handleFilterChange} />
+      <CaseFilter
+        caseFilters={caseFilters}
+        copy={copy}
+        activeFilterIndex={activeFilterIndex}
+        onChange={handleFilterChange}
+      />
 
       <div className="clinical-carousel">
         {currentCase > 0 ? (
           <button
             className="procedure-carousel__control procedure-carousel__control--prev clinical-carousel__control"
             type="button"
-            aria-label="Ver caso clínico anterior"
+            aria-label={copy.previous}
             onClick={() => scrollCase('prev')}
           >
             <ArrowLeft size={26} strokeWidth={2.4} aria-hidden="true" />
@@ -432,6 +438,8 @@ export function ClinicalCases() {
               <CaseCard
                 key={caseCard.key}
                 caseCard={caseCard}
+                patientCount={pacientes.length}
+                copy={copy}
                 index={index}
                 onOpen={setActiveCaseKey}
               />
@@ -443,7 +451,7 @@ export function ClinicalCases() {
           <button
             className="procedure-carousel__control procedure-carousel__control--next clinical-carousel__control"
             type="button"
-            aria-label="Ver próximo caso clínico"
+            aria-label={copy.next}
             onClick={() => scrollCase('next')}
           >
             <ArrowRight size={26} strokeWidth={2.4} aria-hidden="true" />
@@ -455,10 +463,7 @@ export function ClinicalCases() {
         <div className="clinical__ethics-icon">
           <ToothIcon size={34} strokeWidth={1.35} />
         </div>
-        <p>
-          Os casos apresentados possuem caráter acadêmico, preservando ética,
-          privacidade e finalidade demonstrativa.
-        </p>
+        <p>{copy.ethics}</p>
         <HeartPulse size={68} strokeWidth={1} aria-hidden="true" />
       </div>
 
@@ -467,6 +472,8 @@ export function ClinicalCases() {
           <CaseGalleryModal
             key={activeCaseKey}
             activeCaseKey={activeCaseKey}
+            pacientes={pacientes}
+            copy={copy}
             onClose={() => setActiveCaseKey(null)}
           />
         ) : null}
